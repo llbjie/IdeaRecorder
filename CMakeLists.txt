@@ -25,7 +25,6 @@ qt_add_qml_module(IdeaRecorder
         qml/pages/RecordPage.qml
         qml/pages/ListPage.qml
         qml/pages/StatisticsPage.qml
-    NO_RESOURCE_TARGET_PATH
 )
 
 target_link_libraries(IdeaRecorder PRIVATE
