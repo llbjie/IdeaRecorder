@@ -2,8 +2,9 @@
 
 ## 当前状态
 
-**编译状态：** CMake 配置成功，C++ 编译成功（.so 生成），APK 打包待完成
-**代码已推送至：** https://github.com/llbjie/IdeaRecorder (master 分支，1 个 commit)
+**编译状态：** CMake 配置成功，C++ 编译成功（.so 生成），APK 打包待完成（Gradle 镜像已配置）
+**代码已推送至：** https://github.com/llbjie/IdeaRecorder (master 分支)
+**最新进度：** [2026-08-19](docs/progress/2026-08-19.md)
 
 ---
 
@@ -20,7 +21,7 @@
 | **列表页面** | `qml/pages/ListPage.qml` | 已完成 | ListView 展示所有想法，显示内容/标签/时间，支持删除，空状态提示，`refreshList()` 方法 |
 | **统计页面** | `qml/pages/StatisticsPage.qml` | 已完成 | 总想法数卡片 + 标签数卡片 + 标签列表 + 气泡词云区域，调用 `dbManager` 获取数据 |
 | **主界面** | `qml/main.qml` | 已完成 | SwipeView + 自定义底部导航栏（列表/记录/统计），带滑动指示线动画 |
-| **词云组件** | `qml/components/BubbleWordCloud.qml` | 已完成 | 统计页使用的气泡词云可视化组件 |
+| **词云组件** | `qml/components/BubbleWordCloud.qml` | 已完成 | 统计页使用的气泡词云可视化组件，支持点击显示频率 Toast |
 | **词云组件** | `qml/components/WordCloud.qml` | 已完成 | 词云基础组件 |
 | **导航按钮** | `qml/components/BottomNavButton.qml` | 已完成 | 底部导航按钮组件 |
 | **QML 资源** | `qml/resources.qrc` | 已完成 | QML 资源文件，管理 QML 文件的 Qt 资源注册 |
@@ -106,6 +107,7 @@ cmake --build build-android --target apk
 ## 已知问题
 
 1. **StatisticsService 未实现** — 统计逻辑在 QML 中完成，未抽取到 C++ 层
-2. **CMakeLists.txt 中 Qt6_DIR 硬编码** — 指向 `E:/Programs/QT/6.7.3/msvc2019_64`，其他机器需修改
-3. **APK 打包未验证** — 编译成功但最终打包步骤因超时未完成
-4. **CMakeLists.txt 引用了 StatisticsService 但文件为空** — 当前 CMakeLists 未引用 StatisticsService，无影响
+2. **CMakeLists.txt 中 Qt6_DIR 硬编码** — 已删除，现在由 qt-cmake.bat 自动设置
+3. **APK 打包未验证** — Gradle 镜像已配置，待重新执行打包
+4. **Android 字体显示异常** — 使用 font.pointSize 后中文字体笔画仍然挤在一起，待排查
+5. **CMakeLists.txt 引用了 StatisticsService 但文件为空** — 当前 CMakeLists 未引用 StatisticsService，无影响
