@@ -26,6 +26,7 @@ qt_add_executable(IdeaRecorder
     src/main.cpp
     src/DatabaseManager.cpp
     src/IdeaModel.cpp
+    src/TagModel.cpp
     ${QML_RESOURCES}
 )
 

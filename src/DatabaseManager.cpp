@@ -40,19 +40,73 @@ bool DatabaseManager::createTable()
 {
     QSqlQuery query;
     
-    QString createTableSQL = R"(
-        CREATE TABLE IF NOT EXISTS ideas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content TEXT NOT NULL,
-            tags TEXT DEFAULT '',
-            created_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+    // 创建版本表
+    QString createVersionTableSQL = R"(
+        CREATE TABLE IF NOT EXISTS db_version (
+            version INTEGER PRIMARY KEY
         )
     )";
-
-    if (!query.exec(createTableSQL)) {
-        qDebug() << "Failed to create table:" << query.lastError().text();
-        return false;
+    query.exec(createVersionTableSQL);
+    
+    // 获取当前版本
+    int currentVersion = 0;
+    QSqlQuery versionQuery("SELECT version FROM db_version");
+    if (versionQuery.next()) {
+        currentVersion = versionQuery.value(0).toInt();
     }
+    
+    qDebug() << "Database version:" << currentVersion;
+    
+    // 版本1：创建ideas表
+    if (currentVersion < 1) {
+        QString createIdeasSQL = R"(
+            CREATE TABLE IF NOT EXISTS ideas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL,
+                tags TEXT DEFAULT '',
+                created_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+            )
+        )";
+        if (!query.exec(createIdeasSQL)) {
+            qDebug() << "Failed to create ideas table:" << query.lastError().text();
+            return false;
+        }
+        qDebug() << "Version 1: ideas table created";
+    }
+    
+    // 版本2：创建tags表和默认标签
+    if (currentVersion < 2) {
+        QString createTagsSQL = R"(
+            CREATE TABLE IF NOT EXISTS tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )
+        )";
+        if (!query.exec(createTagsSQL)) {
+            qDebug() << "Failed to create tags table:" << query.lastError().text();
+            return false;
+        }
+        
+        // 插入默认标签（如果表为空）
+        query.exec("SELECT COUNT(*) FROM tags");
+        if (query.next() && query.value(0).toInt() == 0) {
+            QStringList defaultTags = {"正面", "负面", "中性"};
+            for (const QString &tag : defaultTags) {
+                QSqlQuery insertQuery;
+                insertQuery.prepare("INSERT INTO tags (name) VALUES (:name)");
+                insertQuery.bindValue(":name", tag);
+                insertQuery.exec();
+            }
+            qDebug() << "Default tags inserted";
+        }
+        qDebug() << "Version 2: tags table created";
+    }
+    
+    // 更新版本号
+    query.exec("DELETE FROM db_version");
+    query.prepare("INSERT INTO db_version (version) VALUES (:version)");
+    query.bindValue(":version", 2);
+    query.exec();
 
     qDebug() << "Database initialized successfully";
     return true;
@@ -161,4 +215,106 @@ QVariantList DatabaseManager::getAllIdeasForWordCloud()
     
     qDebug() << "Loaded" << ideas.size() << "ideas for word cloud";
     return ideas;
+}
+
+bool DatabaseManager::updateIdea(int id, const QString &content, const QString &tags)
+{
+    if (content.trimmed().isEmpty()) {
+        qDebug() << "Cannot save empty idea";
+        return false;
+    }
+
+    QSqlQuery query;
+    query.prepare(R"(
+        UPDATE ideas 
+        SET content = :content, tags = :tags 
+        WHERE id = :id
+    )");
+    query.bindValue(":content", content);
+    query.bindValue(":tags", tags);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to update idea:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Idea updated successfully";
+    emit dataChanged();
+    return true;
+}
+
+QVariantList DatabaseManager::loadAllTags()
+{
+    QVariantList tags;
+    QSqlQuery query("SELECT id, name FROM tags ORDER BY name");
+    
+    while (query.next()) {
+        QVariantMap tag;
+        tag["id"] = query.value(0).toInt();
+        tag["name"] = query.value(1).toString();
+        tags.append(tag);
+    }
+    
+    qDebug() << "Loaded" << tags.size() << "tags";
+    return tags;
+}
+
+bool DatabaseManager::addTag(const QString &name)
+{
+    if (name.trimmed().isEmpty()) {
+        qDebug() << "Cannot add empty tag";
+        return false;
+    }
+
+    QSqlQuery query;
+    query.prepare("INSERT INTO tags (name) VALUES (:name)");
+    query.bindValue(":name", name.trimmed());
+
+    if (!query.exec()) {
+        qDebug() << "Failed to add tag:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Tag added successfully";
+    emit dataChanged();
+    return true;
+}
+
+bool DatabaseManager::deleteTag(int id)
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM tags WHERE id = :id");
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to delete tag:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Tag deleted successfully";
+    emit dataChanged();
+    return true;
+}
+
+bool DatabaseManager::renameTag(int id, const QString &newName)
+{
+    if (newName.trimmed().isEmpty()) {
+        qDebug() << "Cannot rename to empty tag";
+        return false;
+    }
+
+    QSqlQuery query;
+    query.prepare("UPDATE tags SET name = :name WHERE id = :id");
+    query.bindValue(":name", newName.trimmed());
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to rename tag:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Tag renamed successfully";
+    emit dataChanged();
+    return true;
 }

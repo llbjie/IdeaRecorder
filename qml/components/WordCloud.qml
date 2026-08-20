@@ -78,7 +78,7 @@ Rectangle {
                 'import QtQuick; Text {' +
                 '   text: "' + item.word + '";' +
                 '   font.pointSize: ' + fontSize + ';' +
-                '   font.bold: ' + (fontSize > 28) + ';' +
+                '   font.bold: false;' +
                 '   color: "' + textColor + '";' +
                 '   opacity: 0.7 + 0.3 * (' + item.count + ' / ' + root.maxCount + ');' +
                 '   x: Math.random() * (parent.width - 60);' +
@@ -86,8 +86,8 @@ Rectangle {
                 '   MouseArea {' +
                 '       anchors.fill: parent;' +
                 '       hoverEnabled: true;' +
-                '       onEntered: parent.font.bold = true;' +
-                '       onExited: parent.font.bold = ' + (fontSize > 28) + ';' +
+                '       onEntered: parent.opacity = 1.0;' +
+                '       onExited: parent.opacity = 0.7 + 0.3 * (' + item.count + ' / ' + root.maxCount + ');' +
                 '       onClicked: parent.opacity = 0.3;' +
                 '   }' +
                 '}',
