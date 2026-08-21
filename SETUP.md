@@ -147,6 +147,18 @@ allprojects {
 
 Gradle 首次运行需下载依赖，确保网络通畅或已配置镜像。
 
+### 5. VSCode 配置
+
+VSCode 需要安装 CMake Tools 插件。项目已包含 `.vscode/` 配置：
+
+- `settings.json` — 编码设置（Qt 路径不再硬编码）
+- `tasks.json` — 构建任务（Configure Android / Build Android）
+
+VSCode 使用前需确保：
+1. 已设置 `QT_ROOT` 和 `SDK_ROOT` 环境变量
+2. 重启 VSCode 使其读取新的环境变量
+3. 首次使用需运行 "Configure Android" 任务配置 CMake
+
 ## 不同机器配置示例
 
 **机器 A（E 盘）：**
