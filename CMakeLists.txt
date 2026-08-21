@@ -10,7 +10,11 @@ set(CMAKE_AUTORCC ON)
 
 set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
 set(QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-set(Qt6_DIR "E:/Programs/QT/6.7.3/msvc2019_64/lib/cmake/Qt6" CACHE PATH "Path to Qt6 CMake config")
+
+# Qt6_DIR 可通过环境变量 QT_ROOT 自动推导，或手动指定
+if(NOT Qt6_DIR AND DEFINED ENV{QT_ROOT})
+    set(Qt6_DIR "$ENV{QT_ROOT}/6.7.3/msvc2019_64/lib/cmake/Qt6")
+endif()
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core Quick Sql
