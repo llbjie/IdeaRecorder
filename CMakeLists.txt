@@ -11,6 +11,20 @@ set(CMAKE_AUTORCC ON)
 set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
 set(QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
 
+# Qt6_DIR 可通过环境变量 QT_ROOT 自动推导，或手动指定
+if(NOT Qt6_DIR AND DEFINED ENV{QT_ROOT})
+    if(CMAKE_CROSSCOMPILING)
+        set(Qt6_DIR "$ENV{QT_ROOT}/6.7.3/android_arm64_v8a/lib/cmake/Qt6")
+    else()
+        set(Qt6_DIR "$ENV{QT_ROOT}/6.7.3/msvc2019_64/lib/cmake/Qt6")
+    endif()
+endif()
+
+# CMake 4.4 兼容性：显式添加 host Qt tools 搜索路径
+if(NOT CMAKE_CROSSCOMPILING AND DEFINED ENV{QT_ROOT})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{QT_ROOT}/6.7.3/msvc2019_64/lib/cmake")
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS
     Core Quick Sql
 )
@@ -25,6 +39,7 @@ qt_add_executable(IdeaRecorder
     src/main.cpp
     src/DatabaseManager.cpp
     src/IdeaModel.cpp
+    src/TagModel.cpp
     ${QML_RESOURCES}
 )
 

@@ -65,6 +65,25 @@ Rectangle {
         generateBubbleLayout()
     }
     
+    function updateBubblesWithData(data) {
+        var wordArray = []
+        for (var i = 0; i < data.length; i++) {
+            wordArray.push({word: data[i].word, count: data[i].count})
+        }
+        wordArray.sort(function(a, b) { return b.count - a.count })
+        
+        if (wordArray.length > 20) {
+            wordArray = wordArray.slice(0, 20)
+        }
+        
+        root.wordData = wordArray
+        if (wordArray.length > 0) {
+            root.maxCount = wordArray[0].count
+        }
+        
+        generateBubbleLayout()
+    }
+    
     function generateBubbleLayout() {
         var containerWidth = root.width - 20
         var containerHeight = root.height - 20
@@ -212,7 +231,7 @@ Rectangle {
                 '       anchors.centerIn: parent;',
                 '       text: "' + data.word + '";',
                 '       font.pointSize: ' + fontSizeInt + ';',
-                '       font.bold: ' + (fontSizeInt > 20) + ';',
+                '       font.bold: false;',
                 '       color: "' + textColor2 + '";',
                 '       horizontalAlignment: Text.AlignHCenter;',
                 '       verticalAlignment: Text.AlignVCenter;',

@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-**编译状态：** CMake 配置成功，C++ 编译成功（.so 生成），APK 打包待完成（Gradle 镜像已配置）
+**编译状态：** CMake 配置成功，C++ 编译成功，APK 打包成功
 **代码已推送至：** https://github.com/llbjie/IdeaRecorder (master 分支)
-**最新进度：** [2026-08-19](docs/progress/2026-08-19.md)
+**最新进度：** [2026-08-20](docs/progress/2026-08-20.md)
 
 ---
 
@@ -15,9 +15,18 @@
 | 模块 | 文件 | 状态 | 说明 |
 |------|------|------|------|
 | **应用入口** | `src/main.cpp` | 已完成 | 初始化 SQLite 数据库，加载 QML 引擎，注入 `dbManager` 上下文属性 |
-| **数据库管理** | `src/DatabaseManager.h/cpp` | 已完成 | SQLite 增删查：`saveIdea`、`loadAllIdeas`、`deleteIdea`、`getIdeaCount`、`getAllIdeasForWordCloud`，`dataChanged` 信号通知 |
-| **数据模型** | `src/IdeaModel.h/cpp` | 已完成 | `Idea` 类：id/content/tags/createdAt，含 `toVariantMap()` 供 QML 使用 |
-| **记录页面** | `qml/pages/RecordPage.qml` | 已完成 | 文本输入 + 标签输入 + 保存按钮，调用 `dbManager.saveIdea()`，2 秒自动清除提示 |
+| **数据库管理** | `src/DatabaseManager.h/cpp` | 已完成 | SQLite CRUD + 标签管理 + 数据库版本追踪（v1→v2迁移） |
+| **数据模型** | `src/IdeaModel.h/cpp` | 已完成 | `Idea` 类：id/content/tags/createdAt |
+| **标签模型** | `src/TagModel.h/cpp` | 已完成 | `Tag` 类：id/name，供标签管理使用 |
+| **记录页面** | `qml/pages/RecordPage.qml` | 已完成 | 文本输入 + 标签选择（绿色芯片）+ 添加/删除标签 + 保存 |
+| **列表页面** | `qml/pages/ListPage.qml` | 已完成 | 分页展示 + 点击编辑（RecordPage风格）+ 删除确认弹窗 |
+| **统计页面** | `qml/pages/StatisticsPage.qml` | 已完成 | 统计卡片 + 关键词云 + 标签词云 |
+| **主界面** | `qml/main.qml` | 已完成 | SwipeView + 自定义底部导航栏 |
+| **词云组件** | `qml/components/BubbleWordCloud.qml` | 已完成 | 气泡词云 + 点击Toast频率提示 |
+| **词云组件** | `qml/components/WordCloud.qml` | 已完成 | 词云基础组件 |
+| **导航按钮** | `qml/components/BottomNavButton.qml` | 已完成 | 底部导航按钮组件 |
+| **构建系统** | `CMakeLists.txt` | 已完成 | CMake配置，Qt 6.7.3 + Android arm64-v8a 交叉编译 |
+| **Android配置** | `android/AndroidManifest.xml` | 已完成 | 包名 `com.idearecorder.app` |
 | **列表页面** | `qml/pages/ListPage.qml` | 已完成 | ListView 展示所有想法，显示内容/标签/时间，支持删除，空状态提示，`refreshList()` 方法 |
 | **统计页面** | `qml/pages/StatisticsPage.qml` | 已完成 | 总想法数卡片 + 标签数卡片 + 标签列表 + 气泡词云区域，调用 `dbManager` 获取数据 |
 | **主界面** | `qml/main.qml` | 已完成 | SwipeView + 自定义底部导航栏（列表/记录/统计），带滑动指示线动画 |

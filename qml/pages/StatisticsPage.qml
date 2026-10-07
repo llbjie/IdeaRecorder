@@ -13,27 +13,41 @@ Rectangle {
         // 更新总想法数
         ideaCountText.text = dbManager.getIdeaCount()
         
-        // 收集所有标签
+        // 收集所有标签及其出现次数
         var ideas = dbManager.loadAllIdeas()
-        var tags = []
+        var tagCount = {}
         for (var i = 0; i < ideas.length; i++) {
             if (ideas[i].tags) {
                 var parts = ideas[i].tags.split(',')
                 for (var j = 0; j < parts.length; j++) {
                     var tag = parts[j].trim()
-                    if (tag && tags.indexOf(tag) === -1) {
-                        tags.push(tag)
+                    if (tag) {
+                        if (tagCount[tag]) {
+                            tagCount[tag]++
+                        } else {
+                            tagCount[tag] = 1
+                        }
                     }
                 }
             }
         }
-        allTags = tags
-        tagList.model = allTags
         
-        // 更新气泡词云
+        // 转换为词云需要的格式
+        var tagData = []
+        for (var name in tagCount) {
+            tagData.push({word: name, count: tagCount[name]})
+        }
+        allTags = Object.keys(tagCount)
+        
+        // 更新关键词云
         var allIdeas = dbManager.getAllIdeasForWordCloud()
         if (wordCloud) {
             wordCloud.updateBubbles(allIdeas)
+        }
+        
+        // 更新标签词云
+        if (tagCloud) {
+            tagCloud.updateBubblesWithData(tagData)
         }
     }
     
@@ -54,7 +68,7 @@ Rectangle {
             Text {
                 text: "统计信息"
                 font.pointSize: 24
-                font.bold: true
+                font.bold: false
                 color: "#333"
                 Layout.alignment: Qt.AlignHCenter
             }
@@ -84,7 +98,7 @@ Rectangle {
                             id: ideaCountText
                             text: "0"
                             font.pointSize: 28
-                            font.bold: true
+                            font.bold: false
                             color: "#1565C0"
                         }
                     }
@@ -107,7 +121,7 @@ Rectangle {
                         Text {
                             text: allTags.length + " 个"
                             font.pointSize: 28
-                            font.bold: true
+                            font.bold: false
                             color: "#6A1B9A"
                         }
                     }
@@ -132,7 +146,7 @@ Rectangle {
                         Text {
                             text: "关键词云"
                             font.pointSize: 16
-                            font.bold: true
+                            font.bold: false
                             color: "#333"
                         }
                         
@@ -153,10 +167,10 @@ Rectangle {
                 }
             }
             
-            // 标签列表
+            // 标签词云区域
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 140
+                Layout.preferredHeight: 200
                 color: "white"
                 radius: 8
                 
@@ -166,35 +180,17 @@ Rectangle {
                     spacing: 8
                     
                     Text {
-                        text: "所有标签"
+                        text: "标签云"
                         font.pointSize: 16
-                        font.bold: true
+                        font.bold: false
                         color: "#333"
                     }
                     
-                    ListView {
-                        id: tagList
+                    // 标签词云组件
+                    BubbleWordCloud {
+                        id: tagCloud
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        spacing: 6
-                        orientation: ListView.Horizontal
-                        
-                        delegate: Rectangle {
-                            height: 32
-                            color: "#E8EAF6"
-                            radius: 16
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                anchors.left: parent.left
-                                anchors.leftMargin: 14
-                                anchors.right: parent.right
-                                anchors.rightMargin: 14
-                                text: "#" + modelData
-                                font.pointSize: 13
-                                color: "#3F51B5"
-                            }
-                        }
                     }
                 }
             }
@@ -214,7 +210,7 @@ Rectangle {
                 contentItem: Text {
                     text: parent.text
                     color: "white"
-                    font.bold: true
+                    font.bold: false
                     font.pointSize: 15
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
