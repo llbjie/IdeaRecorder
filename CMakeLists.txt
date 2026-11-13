@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# 仅在 Windows 上自动设置 Qt 路径；Linux 下依赖系统的标准路径自动查找
+if(WIN32 AND NOT DEFINED CMAKE_PREFIX_PATH)
+    set(CMAKE_PREFIX_PATH "D:/Programs/QT/6.8.0/msvc2022_64" CACHE PATH "Qt installation prefix")
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Core Quick Sql Qml)
 
 qt_standard_project_setup(REQUIRES 6.5)
