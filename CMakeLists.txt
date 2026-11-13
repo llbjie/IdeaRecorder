@@ -1,46 +1,34 @@
 cmake_minimum_required(VERSION 3.16)
-project(IdeaRecorder VERSION 1.0 LANGUAGES CXX)
+project(IdeaRecorder VERSION 2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-set(QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Sql Qml)
 
-# Qt6_DIR 可通过环境变量 QT_ROOT 自动推导，或手动指定
-if(NOT Qt6_DIR AND DEFINED ENV{QT_ROOT})
-    if(CMAKE_CROSSCOMPILING)
-        set(Qt6_DIR "$ENV{QT_ROOT}/6.7.3/android_arm64_v8a/lib/cmake/Qt6")
-    else()
-        set(Qt6_DIR "$ENV{QT_ROOT}/6.7.3/msvc2019_64/lib/cmake/Qt6")
-    endif()
-endif()
+qt_standard_project_setup(REQUIRES 6.5)
 
-# CMake 4.4 兼容性：显式添加 host Qt tools 搜索路径
-if(NOT CMAKE_CROSSCOMPILING AND DEFINED ENV{QT_ROOT})
-    list(APPEND CMAKE_PREFIX_PATH "$ENV{QT_ROOT}/6.7.3/msvc2019_64/lib/cmake")
-endif()
-
-find_package(Qt6 REQUIRED COMPONENTS
-    Core Quick Sql
-)
-
-qt_standard_project_setup()
-
-qt6_add_resources(QML_RESOURCES
-    "qml/resources.qrc"
-)
-
+# 先创建可执行文件目标
 qt_add_executable(IdeaRecorder
     src/main.cpp
     src/DatabaseManager.cpp
     src/IdeaModel.cpp
     src/TagModel.cpp
-    ${QML_RESOURCES}
+)
+
+# 再把这个可执行文件作为 QML 模块的 backing target
+qt_add_qml_module(IdeaRecorder
+    URI IdeaRecorderModule   
+    VERSION 1.0
+    QML_FILES
+        qml/main.qml
+        qml/pages/RecordPage.qml
+        qml/pages/ListPage.qml
+        qml/pages/StatisticsPage.qml
+        qml/components/BubbleWordCloud.qml
+        qml/components/BottomNavButton.qml
 )
 
 target_link_libraries(IdeaRecorder PRIVATE
@@ -48,7 +36,3 @@ target_link_libraries(IdeaRecorder PRIVATE
     Qt6::Quick
     Qt6::Sql
 )
-
-set(ANDROID_ABI "arm64-v8a")
-set(ANDROID_MIN_SDK_VERSION 26)
-set(ANDROID_TARGET_SDK_VERSION 33)
